@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Toddler Room Hidden Object Game</title>
+    <style>
+        body { 
+            background: #add8e6; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden;
+            cursor: none; 
+            position: relative;
+            font-family: 'Comic Sans MS', 'Comic Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: none; /* Prevents mobile panning and zooming */
+        }
+
+        #game-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            box-sizing: border-box;
+            padding: 0 140px; /* Leave space for checklists on left/right */
+        }
+
+        #canvas-container { 
+            position: relative;
+            background: #000; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #doodleCanvas { 
+            display: block; 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain;
+        }
+
+        .checklist-container {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 100px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #left-checklist { left: 20px; }
+        #right-checklist { right: 20px; }
+
+        .checklist-item {
+            position: relative;
+            background: white;
+            padding: 5px;
+            border-radius: 12px;
+            border: 4px solid #444;
+            width: 60px; 
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.2);
+            transition: opacity 0.3s;
+        }
+
+        .mini-img {
+            max-width: 90%;
+            max-height: 90%;
+            width: auto;
+            height: auto;
+            display: block;
+        }
+
+        .cross-mark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            font-size: 65px;
+            color: #FF1A1A;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 2;
+            line-height: 1;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 20px;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 24px;
+            cursor: pointer; 
+            z-index: 100;
+        }
+        #prevBtn { left: 20px; }
+        #nextBtn { right: 20px; }
+
+        #winMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.1);
+            font-size: 60px;
+            font-weight: bold;
+            color: #FF1A1A;
+            text-transform: uppercase;
+            text-shadow: -3px -3px 0 #FFF, 3px -3px 0 #FFF, -3px 3px 0 #FFF, 3px 3px 0 #FFF;
+            display: none;
+            z-index: 100;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        #winMessage.animate-bounce {
+            display: block;
+            animation: textBounce 1.5s ease-out forwards;
+        }
+
+        #confettiCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+            display: none;
+        }
+
+        @keyframes textBounce {
+            0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -130%) scale(1); opacity: 1; top: 30%; }
+        }
+
+        /* Mobile specific styling adjustments */
+        @media (max-width: 768px) {
+            #game-wrapper {
+                padding: 0 85px;
+            }
+            .checklist-container {
+                width: 70px;
+            }
+            .checklist-item {
+                width: 45px;
+                height: 45px;
+                border-width: 3px;
+            }
+            .cross-mark {
+                font-size: 45px;
+            }
+            #winMessage {
+                font-size: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="prevBtn" class="nav-button">&#8592;</button>
+    <button id="nextBtn" class="nav-button">&#8594;</button>
+    
+    <div id="winMessage">You did it!</div>
+    <canvas id="confettiCanvas"></canvas>
+
+    <div id="game-wrapper">
+        <div id="left-checklist" class="checklist-container">
+            <div class="checklist-item" id="item-ball">
+                <img src="ball.png" alt="Ball" class="mini-img">
+                <div class="cross-mark" id="cross-ball">&times;</div>
+            </div>
+            <div class="checklist-item" id="item-book">
+                <img src="book.png" alt="Book" class="mini-img">
+                <div class="cross-mark" id="cross-book">&times;</div>
+            </div>
+            <div class="checklist-item" id="item-flower">
+                <img src="flower.png" alt="Flower" class="mini-img">
+                <div class="cross-mark" id="cross-flower">&times;</div>
+            </div>
+            <div class="checklist-item" id="item-radio">
+                <img src="radio.png" alt="Radio" class="mini-img">
+                <div class="cross-mark" id="cross-radio">&times;</div>
+            </div>
+            <div class="checklist-item" id="item-stool">
+                <img src="stool.png" alt="Stool" class="mini-img">
+                <div class="cross-mark" id="cross-stool">&times;</div>
+            </div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="doodleCanvas"></canvas>
+        </div>
+
+        <div id="right-checklist" class="checklist-container">
+            <div class="checklist-item" id="item-beetle">
+                <img src="brown beetle.png" alt="Beetle" class="mini-img">
+                <div class="cross-mark" id="cross-beetle">&times;</div>
+            </div>
+            <div class="checklist-item" id="item-car">
+                <img src="small car.png" alt="Small Car" class="mini-img">
+                <div class="cross-mark" id="cross-car">&times;</div>
+            </div>
+            <div class="checklist-item" id="item-dino">
+                <img src="T-Rex.png" alt="T-Rex" class="mini-img">
+                <div class="cross-mark" id="cross-dino">&times;</div>
+            </div>
+            <div class="checklist-item" id="item-flashlight">
+                <img src="flashlight.png" alt="Flashlight" class="mini-img">
+                <div class="cross-mark" id="cross-flashlight">&times;</div>
+            </div>
+            <div class="checklist-item" id="item-recorder">
+                <img src="recorder.png" alt="Recorder" class="mini-img">
+                <div class="cross-mark" id="cross-recorder">&times;</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('doodleCanvas');
+        const ctx = canvas.getContext('2d');
+        const winMessage = document.getElementById('winMessage');
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        
+        const scene = new Image(); 
+        scene.src = 'toddler room.png'; 
+
+        const holeRadius = 75;  
+        let isGameOver = false;
+        let confettiParticles = [];
+        let lastX = 0, lastY = 0;
+
+        const targets = [
+            { id: 'car',        x: 670,  y: 378,  radius: 45, found: false },
+            { id: 'flashlight', x: 1230, y: 150,  radius: 40, found: false },
+            { id: 'dino',       x: 1369, y: 266,  radius: 55, found: false },
+            { id: 'recorder',   x: 1527, y: 807,  radius: 45, found: false },
+            { id: 'beetle',     x: 380,  y: 741,  radius: 40, found: false },
+            
+            { id: 'ball',       x: 987,  y: 173,  radius: 50, found: false }, 
+            { id: 'book',       x: 1437, y: 106,  radius: 45, found: false }, 
+            { id: 'flower',     x: 280,  y: 283,  radius: 45, found: false }, 
+            { id: 'radio',      x: 130,  y: 722,  radius: 50, found: false }, 
+            { id: 'stool',      x: 733,  y: 601,  radius: 45, found: false }  
+        ];
+
+        function speakExpressively(phrase) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(phrase);
+            const voices = window.speechSynthesis.getVoices();
+
+            let bestVoice = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) || 
+                            voices.find(v => v.name.includes('Natural') && v.lang.startsWith('en')) || 
+                            voices.find(v => v.name.includes('Samantha') && v.lang.startsWith('en')) ||
+                            voices.find(v => v.lang.startsWith('en'));
+
+            if (bestVoice) utterance.voice = bestVoice;
+            utterance.pitch = 1.35; 
+            utterance.rate = 1.05;  
+            utterance.volume = 1.0; 
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+        }
+
+        scene.onload = () => {
+            canvas.width = scene.naturalWidth;
+            canvas.height = scene.naturalHeight;
+            lastX = canvas.width / 2;
+            lastY = canvas.height / 2;
+            draw(lastX, lastY);
+        };
+
+        // Calculates exact internal canvas touch coordinates dynamically on any screen scale
+        function getCanvasCoordinates(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            
+            // Scaled dimensions of image inside canvas layout
+            const imgWidth = rect.width;
+            const imgHeight = rect.height;
+            
+            // Difference factors
+            const sx = canvas.width / imgWidth;
+            const sy = canvas.height / imgHeight;
+            
+            return {
+                x: (clientX - rect.left) * sx,
+                y: (clientY - rect.top) * sy
+            };
+        }
+
+        function checkClickOrTap(clientX, clientY) {
+            if (isGameOver) return;
+            const coords = getCanvasCoordinates(clientX, clientY);
+
+            targets.forEach(target => {
+                if (!target.found) {
+                    const dist = Math.sqrt((coords.x - target.x)**2 + (coords.y - target.y)**2);
+                    if (dist <= target.radius) {
+                        target.found = true;
+                        document.getElementById(`cross-${target.id}`).style.display = 'flex';
+                        document.getElementById(`item-${target.id}`).style.opacity = '0.4';
+                        speakExpressively("Good!");
+                    }
+                }
+            });
+
+            if (targets.every(t => t.found)) {
+                winGame();
+            }
+        }
+
+        function handlePointerMove(clientX, clientY) {
+            if (isGameOver) return;
+            const coords = getCanvasCoordinates(clientX, clientY);
+            lastX = coords.x;
+            lastY = coords.y;
+            draw(lastX, lastY);
+        }
+
+        // Standard Mouse Click
+        canvas.addEventListener('click', (e) => {
+            checkClickOrTap(e.clientX, e.clientY);
+        });
+
+        // Mouse Motion Tracking
+        window.addEventListener('mousemove', (e) => {
+            handlePointerMove(e.clientX, e.clientY);
+        });
+
+        // Mobile/Tablet Touch Tracking 
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                checkClickOrTap(e.touches[0].clientX, e.touches[0].clientY);
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => { 
+            if (e.touches.length > 0) {
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, {passive: false});
+
+        function winGame() {
+            isGameOver = true;
+            setTimeout(() => {
+                speakExpressively("Well done!");
+            }, 500);
+            winMessage.classList.add('animate-bounce');
+            document.body.style.cursor = 'default';
+            draw(0, 0); 
+            initConfetti();
+        }
+
+        function initConfetti() {
+            confettiCanvas.style.display = 'block';
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+            
+            const colors = ['#FF1A1A', '#FFB700', '#00D215', '#0084FF', '#DE00FF', '#00F5FF'];
+            for (let i = 0; i < 150; i++) {
+                confettiParticles.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * confettiCanvas.height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            let remaining = false;
+
+            confettiParticles.forEach((p) => {
+                p.tiltAngle += p.tiltAngleIncremental;
+                p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                p.x += Math.sin(p.tiltAngle);
+                p.tilt = Math.sin(p.tiltAngle - confettiParticles.indexOf(p) / 3) * 15;
+
+                if (p.y <= confettiCanvas.height) {
+                    remaining = true;
+                }
+
+                confettiCtx.beginPath();
+                confettiCtx.lineWidth = p.r;
+                confettiCtx.strokeStyle = p.color;
+                confettiCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                confettiCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                confettiCtx.stroke();
+            });
+
+            if (remaining) {
+                requestAnimationFrame(animateConfetti);
+            }
+        }
+
+        function draw(mx, my) {
+            if (!scene.complete) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (isGameOver) {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.drawImage(scene, 0, 0);
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = '#08080c';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(mx, my, holeRadius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.globalCompositeOperation = 'destination-over';
+                ctx.drawImage(scene, 0, 0);
+                
+                ctx.globalCompositeOperation = 'source-over';
+                const gradient = ctx.createRadialGradient(mx, my, holeRadius - 15, mx, my, holeRadius);
+                gradient.addColorStop(0, 'rgba(255, 235, 160, 0.0)');
+                gradient.addColorStop(0.8, 'rgba(255, 235, 160, 0.3)');
+                gradient.addColorStop(1, 'rgba(8, 8, 12, 1.0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(mx, my, holeRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+            draw(lastX, lastY);
+        });
+    </script>
+</body>
+</html>
