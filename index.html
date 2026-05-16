@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Toddler Room Hidden Object Game</title>
+
     <style>
+
+        *{
+            box-sizing:border-box;
+        }
+
         body { 
             background: #add8e6; 
             display: flex; 
@@ -27,10 +33,7 @@
             justify-content: center;
             width: 100vw;
             height: 100vh;
-            max-width: 100%;
-            max-height: 100%;
             position: relative;
-            box-sizing: border-box;
             padding: 10px;
             gap: 10px;
         }
@@ -42,7 +45,8 @@
             z-index: 1;
             width: 100%;
             height: 100%;
-            max-height: 100vh;
+            min-width: 0;
+            min-height: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -54,7 +58,7 @@
             display: block; 
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Keeps the room image aspect ratio clean */
+            object-fit: contain;
         }
 
         .checklist-container {
@@ -118,8 +122,14 @@
             cursor: pointer; 
             z-index: 100;
         }
-        #prevBtn { left: 15px; }
-        #nextBtn { right: 15px; }
+
+        #prevBtn { 
+            left: 15px; 
+        }
+
+        #nextBtn { 
+            right: 15px; 
+        }
 
         #winMessage {
             position: absolute;
@@ -154,63 +164,152 @@
         }
 
         @keyframes textBounce {
-            0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-            100% { transform: translate(-50%, -130%) scale(1); opacity: 1; top: 30%; }
+            0% { 
+                transform: translate(-50%, -50%) scale(0.1); 
+                opacity: 0; 
+            }
+
+            50% { 
+                transform: translate(-50%, -50%) scale(1.2); 
+                opacity: 1; 
+            }
+
+            100% { 
+                transform: translate(-50%, -130%) scale(1); 
+                opacity: 1; 
+                top: 30%; 
+            }
         }
 
-        /* Adjusts for tight vertical layouts (like standard portrait phones) */
-        @media (max-width: 600px) {
-            #game-wrapper {
-                grid-template-columns: 65px 1fr 65px;
-                gap: 5px;
-                padding: 5px;
+
+        /* Phones & tablets */
+        @media (max-width: 900px) {
+
+            body{
+                overflow:hidden;
             }
+
+            #game-wrapper {
+                grid-template-columns: 55px 1fr 55px;
+                gap: 4px;
+                padding: 4px;
+                width: 100vw;
+                height: 100vh;
+            }
+
+            #canvas-container {
+                width: 100%;
+                height: 100%;
+                min-width: 0;
+                min-height: 0;
+            }
+
+            #doodleCanvas {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
             .checklist-item {
-                width: 42px;
-                height: 42px;
+                width: 38px;
+                height: 38px;
                 border-width: 2px;
                 border-radius: 6px;
+                padding: 2px;
             }
+
             .cross-mark {
-                font-size: 40px;
+                font-size: 30px;
             }
+
             #winMessage {
-                font-size: 32px;
+                font-size: 28px;
+                width: 90%;
+                white-space: normal;
+            }
+
+            .nav-button {
+                font-size: 16px;
+                padding: 6px 10px;
+                top: 8px;
             }
         }
+
+
+        /* Landscape phones/tablets */
+        @media (max-width: 1000px) and (orientation: landscape) {
+
+            #game-wrapper {
+                grid-template-columns: 45px 1fr 45px;
+                gap: 2px;
+                padding: 2px;
+            }
+
+            .checklist-container {
+                gap: 4px;
+            }
+
+            .checklist-item {
+                width: 30px;
+                height: 30px;
+                border-radius: 4px;
+            }
+
+            .cross-mark {
+                font-size: 22px;
+            }
+
+            .nav-button {
+                font-size: 14px;
+                padding: 4px 8px;
+            }
+
+            #winMessage {
+                font-size: 22px;
+            }
+        }
+
     </style>
 </head>
+
 <body>
 
     <button id="prevBtn" class="nav-button">&#8592;</button>
     <button id="nextBtn" class="nav-button">&#8594;</button>
     
     <div id="winMessage">You did it!</div>
+
     <canvas id="confettiCanvas"></canvas>
 
     <div id="game-wrapper">
+
         <div id="left-checklist" class="checklist-container">
+
             <div class="checklist-item" id="item-ball">
                 <img src="ball.png" alt="Ball" class="mini-img">
                 <div class="cross-mark" id="cross-ball">&times;</div>
             </div>
+
             <div class="checklist-item" id="item-book">
                 <img src="book.png" alt="Book" class="mini-img">
                 <div class="cross-mark" id="cross-book">&times;</div>
             </div>
+
             <div class="checklist-item" id="item-flower">
                 <img src="flower.png" alt="Flower" class="mini-img">
                 <div class="cross-mark" id="cross-flower">&times;</div>
             </div>
+
             <div class="checklist-item" id="item-radio">
                 <img src="radio.png" alt="Radio" class="mini-img">
                 <div class="cross-mark" id="cross-radio">&times;</div>
             </div>
+
             <div class="checklist-item" id="item-robot">
                 <img src="robot.png" alt="Robot" class="mini-img">
                 <div class="cross-mark" id="cross-robot">&times;</div>
             </div>
+
         </div>
 
         <div id="canvas-container">
@@ -218,261 +317,483 @@
         </div>
 
         <div id="right-checklist" class="checklist-container">
+
             <div class="checklist-item" id="item-beetle">
                 <img src="brown beetle.png" alt="Beetle" class="mini-img">
                 <div class="cross-mark" id="cross-beetle">&times;</div>
             </div>
+
             <div class="checklist-item" id="item-car">
                 <img src="small car.png" alt="Small Car" class="mini-img">
                 <div class="cross-mark" id="cross-car">&times;</div>
             </div>
+
             <div class="checklist-item" id="item-dino">
                 <img src="T-Rex.png" alt="T-Rex" class="mini-img">
                 <div class="cross-mark" id="cross-dino">&times;</div>
             </div>
+
             <div class="checklist-item" id="item-flashlight">
                 <img src="flashlight.png" alt="Flashlight" class="mini-img">
                 <div class="cross-mark" id="cross-flashlight">&times;</div>
             </div>
+
             <div class="checklist-item" id="item-recorder">
                 <img src="recorder.png" alt="Recorder" class="mini-img">
                 <div class="cross-mark" id="cross-recorder">&times;</div>
             </div>
+
         </div>
+
     </div>
 
-    <script>
-        const canvas = document.getElementById('doodleCanvas');
-        const ctx = canvas.getContext('2d');
-        const winMessage = document.getElementById('winMessage');
-        const confettiCanvas = document.getElementById('confettiCanvas');
-        const confettiCtx = confettiCanvas.getContext('2d');
-        
-        const scene = new Image(); 
-        scene.src = 'toddler room.png'; 
+<script>
 
-        // Dynamic scale calculation based on screen density
-        let dynamicHoleRadius = 85;  
-        let isGameOver = false;
-        let confettiParticles = [];
-        let lastX = 0, lastY = 0;
+    const canvas = document.getElementById('doodleCanvas');
+    const ctx = canvas.getContext('2d');
 
-        const targets = [
-            { id: 'car',        x: 670,  y: 378,  radius: 45, found: false },
-            { id: 'flashlight', x: 1230, y: 150,  radius: 40, found: false },
-            { id: 'dino',       x: 1369, y: 266,  radius: 55, found: false },
-            { id: 'recorder',   x: 1527, y: 807,  radius: 45, found: false },
-            { id: 'beetle',     x: 380,  y: 741,  radius: 40, found: false },
-            
-            { id: 'ball',       x: 987,  y: 173,  radius: 50, found: false }, 
-            { id: 'book',       x: 1437, y: 106,  radius: 45, found: false }, 
-            { id: 'flower',     x: 280,  y: 283,  radius: 45, found: false }, 
-            { id: 'radio',      x: 130,  y: 722,  radius: 50, found: false }, 
-            { id: 'robot',      x: 1084, y: 282,  radius: 45, found: false }  
+    const winMessage = document.getElementById('winMessage');
+
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+
+    const scene = new Image(); 
+    scene.src = 'toddler room.png'; 
+
+    let dynamicHoleRadius = 70;
+
+    let isGameOver = false;
+
+    let confettiParticles = [];
+
+    let lastX = 0;
+    let lastY = 0;
+
+    const targets = [
+
+        { id: 'car',        x: 670,  y: 378,  radius: 45, found: false },
+        { id: 'flashlight', x: 1230, y: 150,  radius: 40, found: false },
+        { id: 'dino',       x: 1369, y: 266,  radius: 55, found: false },
+        { id: 'recorder',   x: 1527, y: 807,  radius: 45, found: false },
+        { id: 'beetle',     x: 380,  y: 741,  radius: 40, found: false },
+
+        { id: 'ball',       x: 987,  y: 173,  radius: 50, found: false }, 
+        { id: 'book',       x: 1437, y: 106,  radius: 45, found: false }, 
+        { id: 'flower',     x: 280,  y: 283,  radius: 45, found: false }, 
+        { id: 'radio',      x: 130,  y: 722,  radius: 50, found: false }, 
+        { id: 'robot',      x: 1084, y: 282,  radius: 45, found: false }
+
+    ];
+
+    function speakExpressively(phrase) {
+
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(phrase);
+
+        const voices = window.speechSynthesis.getVoices();
+
+        let bestVoice =
+            voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) || 
+            voices.find(v => v.name.includes('Natural') && v.lang.startsWith('en')) || 
+            voices.find(v => v.name.includes('Samantha') && v.lang.startsWith('en')) ||
+            voices.find(v => v.lang.startsWith('en'));
+
+        if (bestVoice) {
+            utterance.voice = bestVoice;
+        }
+
+        utterance.pitch = 1.35; 
+        utterance.rate = 1.05;  
+        utterance.volume = 1.0; 
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    if (typeof speechSynthesis !== 'undefined' &&
+        speechSynthesis.onvoiceschanged !== undefined) {
+
+        speechSynthesis.onvoiceschanged = () => 
+            window.speechSynthesis.getVoices();
+    }
+
+    scene.onload = () => {
+
+        canvas.width = scene.naturalWidth;
+        canvas.height = scene.naturalHeight;
+
+        updateResponsiveScale();
+
+        lastX = canvas.width / 2;
+        lastY = canvas.height / 2;
+
+        draw(lastX, lastY);
+    };
+
+
+
+    /* FIXED MOBILE SEARCH SIZE */
+    function updateResponsiveScale() {
+
+        const rect = canvas.getBoundingClientRect();
+
+        const scaleFactor = canvas.width / rect.width;
+
+        if (window.innerWidth <= 900) {
+
+            dynamicHoleRadius = 55 * scaleFactor;
+
+            if (window.innerWidth > window.innerHeight) {
+
+                dynamicHoleRadius = 42 * scaleFactor;
+            }
+
+        } else {
+
+            dynamicHoleRadius = 70 * scaleFactor;
+        }
+    }
+
+
+
+    function getCanvasCoordinates(clientX, clientY, isTouch = false) {
+
+        const rect = canvas.getBoundingClientRect();
+
+        const sx = canvas.width / rect.width;
+        const sy = canvas.height / rect.height;
+
+        let targetClientX = clientX;
+        let targetClientY = clientY;
+
+        if (isTouch) {
+
+            const visualOffsetMultiplier = rect.width / 1000;
+
+            targetClientX = clientX + (25 * visualOffsetMultiplier); 
+            targetClientY = clientY - (45 / visualOffsetMultiplier); 
+        }
+
+        return {
+            x: (targetClientX - rect.left) * sx,
+            y: (targetClientY - rect.top) * sy
+        };
+    }
+
+
+
+    function checkClickOrTap(clientX, clientY, isTouch = false) {
+
+        if (isGameOver) return;
+
+        const coords = getCanvasCoordinates(clientX, clientY, isTouch);
+
+        targets.forEach(target => {
+
+            if (!target.found) {
+
+                const dist = Math.sqrt(
+                    (coords.x - target.x) ** 2 +
+                    (coords.y - target.y) ** 2
+                );
+
+                if (dist <= target.radius) {
+
+                    target.found = true;
+
+                    document.getElementById(`cross-${target.id}`).style.display = 'flex';
+
+                    document.getElementById(`item-${target.id}`).style.opacity = '0.4';
+
+                    speakExpressively("Good!");
+                }
+            }
+        });
+
+        if (targets.every(t => t.found)) {
+            winGame();
+        }
+    }
+
+
+
+    function handlePointerMove(clientX, clientY, isTouch = false) {
+
+        if (isGameOver) return;
+
+        const coords = getCanvasCoordinates(clientX, clientY, isTouch);
+
+        lastX = coords.x;
+        lastY = coords.y;
+
+        draw(lastX, lastY);
+    }
+
+
+
+    canvas.addEventListener('click', (e) => {
+
+        checkClickOrTap(e.clientX, e.clientY, false);
+    });
+
+
+
+    window.addEventListener('mousemove', (e) => {
+
+        handlePointerMove(e.clientX, e.clientY, false);
+    });
+
+
+
+    window.addEventListener('touchstart', (e) => {
+
+        if (e.touches.length > 0) {
+
+            checkClickOrTap(
+                e.touches[0].clientX,
+                e.touches[0].clientY,
+                true
+            );
+
+            handlePointerMove(
+                e.touches[0].clientX,
+                e.touches[0].clientY,
+                true
+            );
+        }
+    });
+
+
+
+    window.addEventListener('touchmove', (e) => { 
+
+        if (e.touches.length > 0) {
+
+            handlePointerMove(
+                e.touches[0].clientX,
+                e.touches[0].clientY,
+                true
+            );
+        }
+
+    }, { passive: false });
+
+
+
+    function winGame() {
+
+        isGameOver = true;
+
+        setTimeout(() => {
+
+            speakExpressively("You did it!");
+
+        }, 500);
+
+        winMessage.classList.add('animate-bounce');
+
+        document.body.style.cursor = 'default';
+
+        draw(0, 0);
+
+        initConfetti();
+    }
+
+
+
+    function initConfetti() {
+
+        confettiCanvas.style.display = 'block';
+
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
+
+        const colors = [
+            '#FF1A1A',
+            '#FFB700',
+            '#00D215',
+            '#0084FF',
+            '#DE00FF',
+            '#00F5FF'
         ];
 
-        function speakExpressively(phrase) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(phrase);
-            const voices = window.speechSynthesis.getVoices();
-            let bestVoice = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) || 
-                            voices.find(v => v.name.includes('Natural') && v.lang.startsWith('en')) || 
-                            voices.find(v => v.name.includes('Samantha') && v.lang.startsWith('en')) ||
-                            voices.find(v => v.lang.startsWith('en'));
-            if (bestVoice) utterance.voice = bestVoice;
-            utterance.pitch = 1.35; 
-            utterance.rate = 1.05;  
-            utterance.volume = 1.0; 
-            window.speechSynthesis.speak(utterance);
-        }
+        for (let i = 0; i < 150; i++) {
 
-        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-        }
+            confettiParticles.push({
 
-        scene.onload = () => {
-            canvas.width = scene.naturalWidth;
-            canvas.height = scene.naturalHeight;
-            updateResponsiveScale();
-            lastX = canvas.width / 2;
-            lastY = canvas.height / 2;
-            draw(lastX, lastY);
-        };
+                x: Math.random() * confettiCanvas.width,
 
-        // Calculates sizes reactively so mobile views don't produce a tiny hole
-        function updateResponsiveScale() {
-            const rect = canvas.getBoundingClientRect();
-            // Scaling the hole base radius dynamically relative to bounding display box width
-            const scaleFactor = canvas.width / rect.width;
-            
-            if (rect.width < 500) {
-                // On narrow viewports, explicitly widen the internal view radius
-                dynamicHoleRadius = 95 * (scaleFactor * 0.85);
-            } else {
-                dynamicHoleRadius = 75 * scaleFactor;
-            }
-        }
+                y: Math.random() * confettiCanvas.height -
+                   confettiCanvas.height,
 
-        function getCanvasCoordinates(clientX, clientY, isTouch = false) {
-            const rect = canvas.getBoundingClientRect();
-            const sx = canvas.width / rect.width;
-            const sy = canvas.height / rect.height;
+                r: Math.random() * 6 + 4,
 
-            // Removed touch offset logic so the circle is tracked EXACTLY where the user touches
-            return {
-                x: (clientX - rect.left) * sx,
-                y: (clientY - rect.top) * sy
-            };
-        }
+                d: Math.random() * confettiCanvas.height,
 
-        function checkClickOrTap(clientX, clientY, isTouch = false) {
-            if (isGameOver) return;
-            const coords = getCanvasCoordinates(clientX, clientY, isTouch);
+                color: colors[
+                    Math.floor(Math.random() * colors.length)
+                ],
 
-            targets.forEach(target => {
-                if (!target.found) {
-                    const dist = Math.sqrt((coords.x - target.x)**2 + (coords.y - target.y)**2);
-                    if (dist <= target.radius) {
-                        target.found = true;
-                        document.getElementById(`cross-${target.id}`).style.display = 'flex';
-                        document.getElementById(`item-${target.id}`).style.opacity = '0.4';
-                        speakExpressively("Good!");
-                    }
-                }
+                tilt: Math.random() * 10 - 5,
+
+                tiltAngleIncremental:
+                    Math.random() * 0.07 + 0.02,
+
+                tiltAngle: 0
             });
+        }
 
-            if (targets.every(t => t.found)) {
-                winGame();
+        animateConfetti();
+    }
+
+
+
+    function animateConfetti() {
+
+        confettiCtx.clearRect(
+            0,
+            0,
+            confettiCanvas.width,
+            confettiCanvas.height
+        );
+
+        let remaining = false;
+
+        confettiParticles.forEach((p, index) => {
+
+            p.tiltAngle += p.tiltAngleIncremental;
+
+            p.y +=
+                (Math.cos(p.d) + 3 + p.r / 2) / 2;
+
+            p.x += Math.sin(p.tiltAngle);
+
+            p.tilt =
+                Math.sin(p.tiltAngle - index / 3) * 15;
+
+            if (p.y <= confettiCanvas.height) {
+                remaining = true;
             }
-        }
 
-        function handlePointerMove(clientX, clientY, isTouch = false) {
-            if (isGameOver) return;
-            const coords = getCanvasCoordinates(clientX, clientY, isTouch);
-            lastX = coords.x;
-            lastY = coords.y;
-            draw(lastX, lastY);
-        }
+            confettiCtx.beginPath();
 
-        // Event Handlers
-        canvas.addEventListener('click', (e) => {
-            checkClickOrTap(e.clientX, e.clientY, false);
+            confettiCtx.lineWidth = p.r;
+
+            confettiCtx.strokeStyle = p.color;
+
+            confettiCtx.moveTo(
+                p.x + p.tilt + p.r / 2,
+                p.y
+            );
+
+            confettiCtx.lineTo(
+                p.x + p.tilt,
+                p.y + p.tilt + p.r / 2
+            );
+
+            confettiCtx.stroke();
         });
 
-        window.addEventListener('mousemove', (e) => {
-            handlePointerMove(e.clientX, e.clientY, false);
-        });
-
-        window.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 0) {
-                checkClickOrTap(e.touches[0].clientX, e.touches[0].clientY, true);
-                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY, true);
-            }
-        });
-
-        window.addEventListener('touchmove', (e) => { 
-            if (e.touches.length > 0) {
-                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY, true);
-            }
-        }, {passive: false});
-
-        function winGame() {
-            isGameOver = true;
-            setTimeout(() => {
-                speakExpressively("Wow! You did it! Outstanding job!");
-            }, 500);
-            winMessage.classList.add('animate-bounce');
-            document.body.style.cursor = 'default';
-            draw(0, 0); 
-            initConfetti();
+        if (remaining) {
+            requestAnimationFrame(animateConfetti);
         }
+    }
 
-        function initConfetti() {
-            confettiCanvas.style.display = 'block';
-            confettiCanvas.width = window.innerWidth;
-            confettiCanvas.height = window.innerHeight;
-            
-            const colors = ['#FF1A1A', '#FFB700', '#00D215', '#0084FF', '#DE00FF', '#00F5FF'];
-            for (let i = 0; i < 150; i++) {
-                confettiParticles.push({
-                    x: Math.random() * confettiCanvas.width,
-                    y: Math.random() * confettiCanvas.height - confettiCanvas.height,
-                    r: Math.random() * 6 + 4,
-                    d: Math.random() * confettiCanvas.height,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    tilt: Math.random() * 10 - 5,
-                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
-                    tiltAngle: 0
-                });
-            }
-            animateConfetti();
+
+
+    function draw(mx, my) {
+
+        if (!scene.complete) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (isGameOver) {
+
+            ctx.globalCompositeOperation = 'source-over';
+
+            ctx.drawImage(scene, 0, 0);
+
+        } else {
+
+            ctx.globalCompositeOperation = 'source-over';
+
+            ctx.fillStyle = '#08080c';
+
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.globalCompositeOperation = 'destination-out';
+
+            ctx.beginPath();
+
+            ctx.arc(
+                mx,
+                my,
+                dynamicHoleRadius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+            ctx.globalCompositeOperation = 'destination-over';
+
+            ctx.drawImage(scene, 0, 0);
+
+            ctx.globalCompositeOperation = 'source-over';
+
+            const gradient = ctx.createRadialGradient(
+                mx,
+                my,
+                dynamicHoleRadius - 20,
+                mx,
+                my,
+                dynamicHoleRadius
+            );
+
+            gradient.addColorStop(
+                0,
+                'rgba(255, 235, 160, 0.0)'
+            );
+
+            gradient.addColorStop(
+                0.8,
+                'rgba(255, 235, 160, 0.25)'
+            );
+
+            gradient.addColorStop(
+                1,
+                'rgba(8, 8, 12, 1.0)'
+            );
+
+            ctx.fillStyle = gradient;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                mx,
+                my,
+                dynamicHoleRadius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
         }
+    }
 
-        function animateConfetti() {
-            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-            let remaining = false;
 
-            confettiParticles.forEach((p) => {
-                p.tiltAngle += p.tiltAngleIncremental;
-                p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-                p.x += Math.sin(p.tiltAngle);
-                p.tilt = Math.sin(p.tiltAngle - confettiParticles.indexOf(p) / 3) * 15;
 
-                if (p.y <= confettiCanvas.height) {
-                    remaining = true;
-                }
+    window.addEventListener('resize', () => {
 
-                confettiCtx.beginPath();
-                confettiCtx.lineWidth = p.r;
-                confettiCtx.strokeStyle = p.color;
-                confettiCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
-                confettiCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
-                confettiCtx.stroke();
-            });
+        updateResponsiveScale();
 
-            if (remaining) {
-                requestAnimationFrame(animateConfetti);
-            }
-        }
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
 
-        function draw(mx, my) {
-            if (!scene.complete) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            if (isGameOver) {
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.drawImage(scene, 0, 0);
-            } else {
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = '#08080c';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.beginPath();
-                ctx.arc(mx, my, dynamicHoleRadius, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.globalCompositeOperation = 'destination-over';
-                ctx.drawImage(scene, 0, 0);
-                
-                ctx.globalCompositeOperation = 'source-over';
-                const gradient = ctx.createRadialGradient(mx, my, dynamicHoleRadius - 20, mx, my, dynamicHoleRadius);
-                gradient.addColorStop(0, 'rgba(255, 235, 160, 0.0)');
-                gradient.addColorStop(0.8, 'rgba(255, 235, 160, 0.25)');
-                gradient.addColorStop(1, 'rgba(8, 8, 12, 1.0)');
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(mx, my, dynamicHoleRadius, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
+        draw(lastX, lastY);
+    });
 
-        window.addEventListener('resize', () => {
-            updateResponsiveScale();
-            confettiCanvas.width = window.innerWidth;
-            confettiCanvas.height = window.innerHeight;
-            draw(lastX, lastY);
-        });
-    </script>
+</script>
+
 </body>
 </html>
