@@ -21,18 +21,18 @@
             touch-action: none;
         }
 
-        /* Responsive Wrapper to contain both sidebars and the game canvas uniformly */
+        /* Enforces strict vertical bounds so nothing gets cut off in landscape */
         #game-container {
             display: grid;
-            grid-template-columns: 80px 1fr 80px;
+            grid-template-columns: auto 1fr auto;
             width: 98vw;
             max-width: 1200px;
-            height: auto;
-            aspect-ratio: 16 / 9; /* Enforces native widescreen desktop proportions on mobile */
+            max-height: 95vh; 
+            aspect-ratio: 16 / 9; 
             align-items: center;
             gap: 10px;
             background: #1a293b;
-            padding: 12px;
+            padding: 10px;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         }
@@ -61,11 +61,11 @@
         .checklist-container {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             align-items: center;
             justify-content: space-between;
             height: 100%;
-            padding: 4px 0;
+            padding: 2px 0;
         }
 
         .checklist-item {
@@ -74,8 +74,8 @@
             padding: 4px;
             border-radius: 12px;
             border: 3px solid #3d566e;
-            width: 64px; 
-            height: 64px;
+            width: 60px; 
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -101,7 +101,7 @@
             display: none; 
             align-items: center;
             justify-content: center;
-            font-size: 50px;
+            font-size: 45px;
             color: #FF1A1A;
             font-weight: bold;
             pointer-events: none;
@@ -109,7 +109,6 @@
             line-height: 1;
         }
 
-        /* Directional Control Buttons */
         .nav-button {
             position: absolute;
             top: 20px;
@@ -164,30 +163,49 @@
             100% { transform: translate(-50%, -130%) scale(1); opacity: 1; top: 30%; }
         }
 
-        /* Mobile Optimization: Shrinks layout proportionally on small screens */
-        @media (max-width: 768px) {
+        /* TARGETS PHONES IN LANDSCAPE MODE TO PREVENT SIDEBAR OVERFLOW */
+        @media (max-height: 500px) and (orientation: landscape) {
             #game-container {
-                grid-template-columns: 48px 1fr 48px;
                 gap: 6px;
                 padding: 6px;
+                max-height: 98vh;
+            }
+            .checklist-item {
+                width: calc(90vh / 5 - 8px); /* Dynamically shrinks boxes to mathematically fit screen height */
+                height: calc(90vh / 5 - 8px);
+                border-width: 2px;
+                border-radius: 8px;
+                padding: 2px;
+            }
+            .cross-mark {
+                font-size: 28px;
+            }
+            .nav-button {
+                padding: 4px 8px;
+                font-size: 16px;
+                top: 8px;
+            }
+            #prevBtn { left: 8px; }
+            #nextBtn { right: 8px; }
+        }
+
+        /* Portrait Mobile Optimization */
+        @media (max-width: 768px) and (orientation: portrait) {
+            #game-container {
+                grid-template-columns: 45px 1fr 45px;
+                gap: 4px;
+                padding: 4px;
                 width: 99vw;
             }
             .checklist-item {
-                width: 42px;
-                height: 42px;
+                width: 38px;
+                height: 38px;
                 border-width: 2px;
-                border-radius: 8px;
+                border-radius: 6px;
             }
             .cross-mark {
-                font-size: 36px;
+                font-size: 30px;
             }
-            .nav-button {
-                padding: 6px 10px;
-                font-size: 16px;
-                top: 10px;
-            }
-            #prevBtn { left: 10px; }
-            #nextBtn { right: 10px; }
         }
     </style>
 </head>
@@ -261,7 +279,6 @@
         const scene = new Image(); 
         scene.src = 'toddler room.png'; 
 
-        // Static radius relative to native 1920x1080 canvas map coordinates
         let baseHoleRadius = 140;  
         let isGameOver = false;
         let confettiParticles = [];
@@ -300,7 +317,6 @@
         }
 
         scene.onload = () => {
-            // Force 16:9 internal system coordinate canvas space
             canvas.width = 1920;
             canvas.height = 1080;
             lastX = canvas.width / 2;
@@ -308,7 +324,6 @@
             draw(lastX, lastY);
         };
 
-        // Uniform coordinate normalizer for tap & click event mapping
         function getCanvasCoordinates(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
             return {
@@ -346,7 +361,6 @@
             draw(lastX, lastY);
         }
 
-        // Integrated Native Interfaces
         canvas.addEventListener('click', (e) => {
             checkClickOrTap(e.clientX, e.clientY);
         });
