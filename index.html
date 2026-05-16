@@ -2,113 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Toddler Room Hidden Object Game</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
-        body, html { 
-            background: #111e2e; 
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+        body { 
+            background: #add8e6; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
             overflow: hidden;
+            cursor: none; 
+            position: relative;
             font-family: 'Comic Sans MS', 'Comic Sans', sans-serif;
             -webkit-tap-highlight-color: transparent;
             touch-action: none;
         }
 
-        /* Fullscreen Layout Wrapper */
-        #game-container {
-            position: relative;
-            display: flex;
+        #game-wrapper {
+            display: grid;
+            grid-template-columns: 90px 1fr 90px;
             align-items: center;
             justify-content: center;
             width: 100vw;
             height: 100vh;
-            background: #1a293b;
-            padding: 0;
-            overflow: hidden;
+            max-width: 100%;
+            max-height: 100%;
+            position: relative;
+            box-sizing: border-box;
+            padding: 10px;
+            gap: 10px;
         }
 
-        /* Canvas fills the complete background space */
-        #canvas-wrapper { 
-            position: absolute;
-            top: 0;
-            left: 0;
+        #canvas-container { 
+            position: relative;
+            background: #000; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            z-index: 1;
             width: 100%;
             height: 100%;
-            background: #000; 
+            max-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1;
+            overflow: hidden;
+            border-radius: 12px;
         }
 
         #doodleCanvas { 
             display: block; 
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Forces scene to stretch across whole background */
+            object-fit: contain; /* Keeps the room image aspect ratio clean */
         }
 
-        /* Fixed absolute Sidebars to prevent overlapping browser/nav buttons */
         .checklist-container {
-            position: absolute;
-            top: 0;
-            bottom: 0;
+            z-index: 10;
             display: flex;
             flex-direction: column;
             gap: 8px;
             align-items: center;
             justify-content: center;
-            padding: 10px;
-            z-index: 5;
-            background: rgba(26, 41, 59, 0.4);
-            backdrop-filter: blur(4px);
-            width: 90px;
+            height: 100%;
         }
-        #left-checklist { left: 0; border-right: 2px solid rgba(42, 59, 80, 0.5); }
-        #right-checklist { right: 0; border-left: 2px solid rgba(42, 59, 80, 0.5); }
 
         .checklist-item {
             position: relative;
-            background: #2c3e50;
+            background: white;
             padding: 4px;
-            border-radius: 12px;
-            border: 3px solid #3d566e;
-            width: 65px; 
-            height: 65px;
+            border-radius: 10px;
+            border: 3px solid #444;
+            width: 55px; 
+            height: 55px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-            transition: opacity 0.3s, transform 0.2s;
+            box-shadow: 2px 4px 6px rgba(0,0,0,0.2);
+            transition: opacity 0.3s;
         }
 
         .mini-img {
-            max-width: 85%;
-            max-height: 85%;
+            max-width: 90%;
+            max-height: 90%;
             width: auto;
             height: auto;
             display: block;
-            filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.4));
-        }
-
-        /* Text styling placeholder for elements like Stool */
-        .item-label {
-            font-size: 10px;
-            color: #fff;
-            margin-top: 2px;
-            text-align: center;
-            max-width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
         }
 
         .cross-mark {
@@ -120,44 +99,40 @@
             display: none; 
             align-items: center;
             justify-content: center;
-            font-size: 45px;
+            font-size: 55px;
             color: #FF1A1A;
             font-weight: bold;
             pointer-events: none;
-            z-index: 6;
+            z-index: 2;
             line-height: 1;
         }
 
-        /* Navigation elements layered clearly without covering item frames */
         .nav-button {
             position: absolute;
             top: 15px;
-            padding: 10px 16px;
-            background: rgba(44, 62, 80, 0.9);
-            border: 2px solid #3d566e;
-            color: white;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #333;
             border-radius: 8px;
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer; 
-            z-index: 10;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 100;
         }
-        #prevBtn { left: 105px; } /* Pushed inwards past the width of left-checklist */
-        #nextBtn { right: 105px; } /* Pushed inwards past the width of right-checklist */
+        #prevBtn { left: 15px; }
+        #nextBtn { right: 15px; }
 
         #winMessage {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.1);
-            font-size: 54px;
+            font-size: 50px;
             font-weight: bold;
             color: #FF1A1A;
             text-transform: uppercase;
             text-shadow: -3px -3px 0 #FFF, 3px -3px 0 #FFF, -3px 3px 0 #FFF, 3px 3px 0 #FFF;
             display: none;
-            z-index: 101;
+            z-index: 100;
             white-space: nowrap;
             text-align: center;
         }
@@ -184,41 +159,12 @@
             100% { transform: translate(-50%, -130%) scale(1); opacity: 1; top: 30%; }
         }
 
-        /* Landscape Mobile optimization adjusting item density dynamically */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .checklist-container {
-                width: 65px;
-                padding: 4px;
-                gap: 4px;
-            }
-            .checklist-item {
-                width: calc(95vh / 5 - 8px); 
-                height: calc(95vh / 5 - 8px);
-                border-width: 2px;
-                border-radius: 8px;
-                padding: 2px;
-            }
-            .item-label {
-                font-size: 8px;
-            }
-            .cross-mark {
-                font-size: 26px;
-            }
-            .nav-button {
-                padding: 4px 10px;
-                font-size: 16px;
-                top: 8px;
-            }
-            #prevBtn { left: 75px; }
-            #nextBtn { right: 75px; }
-        }
-
-        /* Portrait Mobile Optimization */
-        @media (max-width: 768px) and (orientation: portrait) {
-            .checklist-container {
-                width: 50px;
-                padding: 2px;
-                gap: 6px;
+        /* Adjusts for tight vertical layouts (like standard portrait phones) */
+        @media (max-width: 600px) {
+            #game-wrapper {
+                grid-template-columns: 65px 1fr 65px;
+                gap: 5px;
+                padding: 5px;
             }
             .checklist-item {
                 width: 42px;
@@ -227,15 +173,11 @@
                 border-radius: 6px;
             }
             .cross-mark {
-                font-size: 28px;
+                font-size: 40px;
             }
-            .nav-button {
-                padding: 6px 12px;
-                font-size: 18px;
-                top: 10px;
+            #winMessage {
+                font-size: 32px;
             }
-            #prevBtn { left: 58px; }
-            #nextBtn { right: 58px; }
         }
     </style>
 </head>
@@ -247,7 +189,7 @@
     <div id="winMessage">You did it!</div>
     <canvas id="confettiCanvas"></canvas>
 
-    <div id="game-container">
+    <div id="game-wrapper">
         <div id="left-checklist" class="checklist-container">
             <div class="checklist-item" id="item-ball">
                 <img src="ball.png" alt="Ball" class="mini-img">
@@ -266,13 +208,12 @@
                 <div class="cross-mark" id="cross-radio">&times;</div>
             </div>
             <div class="checklist-item" id="item-stool">
-                <img src="stool.png" alt="Stool" class="mini-img" onerror="this.style.display='none';">
-                <div class="item-label">Stool</div>
+                <img src="stool.png" alt="Stool" class="mini-img">
                 <div class="cross-mark" id="cross-stool">&times;</div>
             </div>
         </div>
 
-        <div id="canvas-wrapper">
+        <div id="canvas-container">
             <canvas id="doodleCanvas"></canvas>
         </div>
 
@@ -310,23 +251,24 @@
         const scene = new Image(); 
         scene.src = 'toddler room.png'; 
 
-        let baseHoleRadius = 140;  
+        // Dynamic scale calculation based on screen density
+        let dynamicHoleRadius = 85;  
         let isGameOver = false;
         let confettiParticles = [];
         let lastX = 0, lastY = 0;
 
         const targets = [
-            { id: 'car',        x: 670,  y: 378,  radius: 50, found: false },
-            { id: 'flashlight', x: 1230, y: 150,  radius: 45, found: false },
-            { id: 'dino',       x: 1369, y: 266,  radius: 60, found: false },
-            { id: 'recorder',   x: 1527, y: 807,  radius: 50, found: false },
-            { id: 'beetle',     x: 380,  y: 741,  radius: 45, found: false },
+            { id: 'car',        x: 670,  y: 378,  radius: 45, found: false },
+            { id: 'flashlight', x: 1230, y: 150,  radius: 40, found: false },
+            { id: 'dino',       x: 1369, y: 266,  radius: 55, found: false },
+            { id: 'recorder',   x: 1527, y: 807,  radius: 45, found: false },
+            { id: 'beetle',     x: 380,  y: 741,  radius: 40, found: false },
             
-            { id: 'ball',       x: 987,  y: 173,  radius: 55, found: false }, 
-            { id: 'book',       x: 1437, y: 106,  radius: 50, found: false }, 
-            { id: 'flower',     x: 280,  y: 283,  radius: 50, found: false }, 
-            { id: 'radio',      x: 130,  y: 722,  radius: 55, found: false }, 
-            { id: 'stool',      x: 470,  y: 750,  radius: 55, found: false }  
+            { id: 'ball',       x: 987,  y: 173,  radius: 50, found: false }, 
+            { id: 'book',       x: 1437, y: 106,  radius: 45, found: false }, 
+            { id: 'flower',     x: 280,  y: 283,  radius: 45, found: false }, 
+            { id: 'radio',      x: 130,  y: 722,  radius: 50, found: false }, 
+            { id: 'stool',      x: 733,  y: 601,  radius: 45, found: false }  
         ];
 
         function speakExpressively(phrase) {
@@ -340,6 +282,7 @@
             if (bestVoice) utterance.voice = bestVoice;
             utterance.pitch = 1.35; 
             utterance.rate = 1.05;  
+            utterance.volume = 1.0; 
             window.speechSynthesis.speak(utterance);
         }
 
@@ -347,48 +290,53 @@
             speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
         }
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            if (scene.complete) {
-                draw(lastX, lastY);
+        scene.onload = () => {
+            canvas.width = scene.naturalWidth;
+            canvas.height = scene.naturalHeight;
+            updateResponsiveScale();
+            lastX = canvas.width / 2;
+            lastY = canvas.height / 2;
+            draw(lastX, lastY);
+        };
+
+        // Calculates sizes reactively so mobile views don't produce a tiny hole
+        function updateResponsiveScale() {
+            const rect = canvas.getBoundingClientRect();
+            // Scaling the hole base radius dynamically relative to bounding display box width
+            const scaleFactor = canvas.width / rect.width;
+            
+            if (rect.width < 500) {
+                // On narrow viewports, explicitly widen the internal view radius
+                dynamicHoleRadius = 95 * (scaleFactor * 0.85);
+            } else {
+                dynamicHoleRadius = 75 * scaleFactor;
             }
         }
 
-        scene.onload = () => {
-            lastX = window.innerWidth / 2;
-            lastY = window.innerHeight / 2;
-            resizeCanvas();
-        };
-
-        function getCanvasCoordinates(clientX, clientY) {
+        function getCanvasCoordinates(clientX, clientY, isTouch = false) {
             const rect = canvas.getBoundingClientRect();
-            
-            // Computes the actual image projection fit to cleanly align touch coordinates
-            const imgRatio = 1920 / 1080;
-            const viewRatio = rect.width / rect.height;
-            
-            let scaleX, scaleY, offsetX = 0, offsetY = 0;
-            
-            if (viewRatio > imgRatio) {
-                const renderWidth = rect.height * imgRatio;
-                offsetX = (rect.width - renderWidth) / 2;
-                scaleX = scaleY = 1080 / rect.height;
-            } else {
-                const renderHeight = rect.width / imgRatio;
-                offsetY = (rect.height - renderHeight) / 2;
-                scaleX = scaleY = 1920 / rect.width;
+            const sx = canvas.width / rect.width;
+            const sy = canvas.height / rect.height;
+
+            let targetClientX = clientX;
+            let targetClientY = clientY;
+
+            if (isTouch) {
+                // Responsive finger offsets based on actual layout scaling
+                const visualOffsetMultiplier = rect.width / 1000; 
+                targetClientX = clientX + (35 * visualOffsetMultiplier); 
+                targetClientY = clientY - (85 / visualOffsetMultiplier); 
             }
 
             return {
-                x: (clientX - rect.left - offsetX) * scaleX,
-                y: (clientY - rect.top - offsetY) * scaleY
+                x: (targetClientX - rect.left) * sx,
+                y: (targetClientY - rect.top) * sy
             };
         }
 
-        function checkClickOrTap(clientX, clientY) {
+        function checkClickOrTap(clientX, clientY, isTouch = false) {
             if (isGameOver) return;
-            const coords = getCanvasCoordinates(clientX, clientY);
+            const coords = getCanvasCoordinates(clientX, clientY, isTouch);
 
             targets.forEach(target => {
                 if (!target.found) {
@@ -407,32 +355,33 @@
             }
         }
 
-        function handlePointerMove(clientX, clientY) {
+        function handlePointerMove(clientX, clientY, isTouch = false) {
             if (isGameOver) return;
-            const rect = canvas.getBoundingClientRect();
-            lastX = clientX - rect.left;
-            lastY = clientY - rect.top;
+            const coords = getCanvasCoordinates(clientX, clientY, isTouch);
+            lastX = coords.x;
+            lastY = coords.y;
             draw(lastX, lastY);
         }
 
+        // Event Handlers
         canvas.addEventListener('click', (e) => {
-            checkClickOrTap(e.clientX, e.clientY);
+            checkClickOrTap(e.clientX, e.clientY, false);
         });
 
         window.addEventListener('mousemove', (e) => {
-            handlePointerMove(e.clientX, e.clientY);
+            handlePointerMove(e.clientX, e.clientY, false);
         });
 
         window.addEventListener('touchstart', (e) => {
             if (e.touches.length > 0) {
-                checkClickOrTap(e.touches[0].clientX, e.touches[0].clientY);
-                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+                checkClickOrTap(e.touches[0].clientX, e.touches[0].clientY, true);
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY, true);
             }
         });
 
         window.addEventListener('touchmove', (e) => { 
             if (e.touches.length > 0) {
-                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY, true);
             }
         }, {passive: false});
 
@@ -442,6 +391,7 @@
                 speakExpressively("Wow! You did it! Outstanding job!");
             }, 500);
             winMessage.classList.add('animate-bounce');
+            document.body.style.cursor = 'default';
             draw(0, 0); 
             initConfetti();
         }
@@ -495,28 +445,12 @@
         }
 
         function draw(mx, my) {
+            if (!scene.complete) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Dynamic object layout rendering scales image to screen bounds cleanly
-            const imgRatio = 1920 / 1080;
-            const canvasRatio = canvas.width / canvas.height;
-            let renderWidth, renderHeight, xOffset, yOffset;
-
-            if (canvasRatio > imgRatio) {
-                renderHeight = canvas.height;
-                renderWidth = canvas.height * imgRatio;
-                xOffset = (canvas.width - renderWidth) / 2;
-                yOffset = 0;
-            } else {
-                renderWidth = canvas.width;
-                renderHeight = canvas.width / imgRatio;
-                xOffset = 0;
-                yOffset = (canvas.height - renderHeight) / 2;
-            }
             
             if (isGameOver) {
                 ctx.globalCompositeOperation = 'source-over';
-                ctx.drawImage(scene, xOffset, yOffset, renderWidth, renderHeight);
+                ctx.drawImage(scene, 0, 0);
             } else {
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.fillStyle = '#08080c';
@@ -524,28 +458,29 @@
                 
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
-                ctx.arc(mx, my, baseHoleRadius, 0, Math.PI * 2);
+                ctx.arc(mx, my, dynamicHoleRadius, 0, Math.PI * 2);
                 ctx.fill();
                 
                 ctx.globalCompositeOperation = 'destination-over';
-                ctx.drawImage(scene, xOffset, yOffset, renderWidth, renderHeight);
+                ctx.drawImage(scene, 0, 0);
                 
                 ctx.globalCompositeOperation = 'source-over';
-                const gradient = ctx.createRadialGradient(mx, my, baseHoleRadius - 30, mx, my, baseHoleRadius);
-                gradient.addColorStop(0, 'rgba(255, 240, 180, 0.0)');
-                gradient.addColorStop(0.7, 'rgba(255, 240, 180, 0.2)');
+                const gradient = ctx.createRadialGradient(mx, my, dynamicHoleRadius - 20, mx, my, dynamicHoleRadius);
+                gradient.addColorStop(0, 'rgba(255, 235, 160, 0.0)');
+                gradient.addColorStop(0.8, 'rgba(255, 235, 160, 0.25)');
                 gradient.addColorStop(1, 'rgba(8, 8, 12, 1.0)');
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(mx, my, baseHoleRadius, 0, Math.PI * 2);
+                ctx.arc(mx, my, dynamicHoleRadius, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
         window.addEventListener('resize', () => {
-            resizeCanvas();
+            updateResponsiveScale();
             confettiCanvas.width = window.innerWidth;
             confettiCanvas.height = window.innerHeight;
+            draw(lastX, lastY);
         });
     </script>
 </body>
