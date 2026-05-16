@@ -302,29 +302,37 @@
         // Calculates sizes reactively so mobile views don't produce a tiny hole
         function updateResponsiveScale() {
             const rect = canvas.getBoundingClientRect();
-            // Scaling the hole base radius dynamically relative to bounding display box width
             const scaleFactor = canvas.width / rect.width;
             
             if (rect.width < 500) {
-                // On narrow viewports, explicitly widen the internal view radius
-                dynamicHoleRadius = 95 * (scaleFactor * 0.85);
+                // Increased base size from 95 to 115 to help view around the tracking finger
+                dynamicHoleRadius = 115 * (scaleFactor * 0.85);
             } else {
-                dynamicHoleRadius = 75 * scaleFactor;
+                // Increased base size from 75 to 95 for desktop/tablets
+                dynamicHoleRadius = 95 * scaleFactor;
             }
         }
 
-        function checkClickOrTap(clientX, clientY) {
-            if (isGameOver) return;
-            
+        function getCanvasCoordinates(clientX, clientY, isTouch = false) {
             const rect = canvas.getBoundingClientRect();
             const sx = canvas.width / rect.width;
             const sy = canvas.height / rect.height;
-            const mx = (clientX - rect.left) * sx;
-            const my = (clientY - rect.top) * sy;
+
+            // Touch finger offsets have been entirely removed. 
+            // The flashlight center point now anchors perfectly under the touch event position.
+            return {
+                x: (clientX - rect.left) * sx,
+                y: (clientY - rect.top) * sy
+            };
+        }
+
+        function checkClickOrTap(clientX, clientY, isTouch = false) {
+            if (isGameOver) return;
+            const coords = getCanvasCoordinates(clientX, clientY, isTouch);
 
             targets.forEach(target => {
                 if (!target.found) {
-                    const dist = Math.sqrt((mx - target.x)**2 + (my - target.y)**2);
+                    const dist = Math.sqrt((coords.x - target.x)**2 + (coords.y - target.y)**2);
                     if (dist <= target.radius) {
                         target.found = true;
                         document.getElementById(`cross-${target.id}`).style.display = 'flex';
@@ -339,37 +347,34 @@
             }
         }
 
-        function update(e) {
+        function handlePointerMove(clientX, clientY, isTouch = false) {
             if (isGameOver) return;
-            const rect = canvas.getBoundingClientRect();
-            const sx = canvas.width / rect.width;
-            const sy = canvas.height / rect.height;
-            
-            // Evaluates touch data lists first for mobile, falls back to mouse event properties if empty
-            const cx = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
-            const cy = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
-            
-            lastX = (cx - rect.left) * sx;
-            lastY = (cy - rect.top) * sy;
+            const coords = getCanvasCoordinates(clientX, clientY, isTouch);
+            lastX = coords.x;
+            lastY = coords.y;
             draw(lastX, lastY);
         }
 
         // Event Handlers
         canvas.addEventListener('click', (e) => {
-            checkClickOrTap(e.clientX, e.clientY);
+            checkClickOrTap(e.clientX, e.clientY, false);
         });
 
-        window.addEventListener('mousemove', update);
+        window.addEventListener('mousemove', (e) => {
+            handlePointerMove(e.clientX, e.clientY, false);
+        });
 
         window.addEventListener('touchstart', (e) => {
             if (e.touches.length > 0) {
-                checkClickOrTap(e.touches[0].clientX, e.touches[0].clientY);
-                update(e);
+                checkClickOrTap(e.touches[0].clientX, e.touches[0].clientY, true);
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY, true);
             }
         });
 
         window.addEventListener('touchmove', (e) => { 
-            update(e);
+            if (e.touches.length > 0) {
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY, true);
+            }
         }, {passive: false});
 
         function winGame() {
