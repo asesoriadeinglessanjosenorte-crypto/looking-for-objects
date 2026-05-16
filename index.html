@@ -318,19 +318,10 @@
             const sx = canvas.width / rect.width;
             const sy = canvas.height / rect.height;
 
-            let targetClientX = clientX;
-            let targetClientY = clientY;
-
-            if (isTouch) {
-                // Responsive finger offsets based on actual layout scaling
-                const visualOffsetMultiplier = rect.width / 1000; 
-                targetClientX = clientX + (35 * visualOffsetMultiplier); 
-                targetClientY = clientY - (85 / visualOffsetMultiplier); 
-            }
-
+            // Removed touch offset logic so the circle is tracked EXACTLY where the user touches
             return {
-                x: (targetClientX - rect.left) * sx,
-                y: (targetClientY - rect.top) * sy
+                x: (clientX - rect.left) * sx,
+                y: (clientY - rect.top) * sy
             };
         }
 
@@ -388,7 +379,7 @@
         function winGame() {
             isGameOver = true;
             setTimeout(() => {
-                speakExpressively("You did it!");
+                speakExpressively("Wow! You did it! Outstanding job!");
             }, 500);
             winMessage.classList.add('animate-bounce');
             document.body.style.cursor = 'default';
