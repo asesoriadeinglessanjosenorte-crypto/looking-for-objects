@@ -207,9 +207,9 @@
                 <img src="radio.png" alt="Radio" class="mini-img">
                 <div class="cross-mark" id="cross-radio">&times;</div>
             </div>
-            <div class="checklist-item" id="item-stool">
-                <img src="stool.png" alt="Stool" class="mini-img">
-                <div class="cross-mark" id="cross-stool">&times;</div>
+            <div class="checklist-item" id="item-robot">
+                <img src="robot.png" alt="Robot" class="mini-img">
+                <div class="cross-mark" id="cross-robot">&times;</div>
             </div>
         </div>
 
@@ -268,7 +268,8 @@
             { id: 'book',       x: 1437, y: 106,  radius: 45, found: false }, 
             { id: 'flower',     x: 280,  y: 283,  radius: 45, found: false }, 
             { id: 'radio',      x: 130,  y: 722,  radius: 50, found: false }, 
-            { id: 'stool',      x: 733,  y: 601,  radius: 45, found: false }  
+            // Substituted Stool coordinates with Robot coordinates
+            { id: 'robot',      x: 1084, y: 282,  radius: 45, found: false }  
         ];
 
         function speakExpressively(phrase) {
@@ -305,10 +306,8 @@
             const scaleFactor = canvas.width / rect.width;
             
             if (rect.width < 500) {
-                // Increased base size from 95 to 115 to help view around the tracking finger
                 dynamicHoleRadius = 115 * (scaleFactor * 0.85);
             } else {
-                // Increased base size from 75 to 95 for desktop/tablets
                 dynamicHoleRadius = 95 * scaleFactor;
             }
         }
@@ -318,8 +317,6 @@
             const sx = canvas.width / rect.width;
             const sy = canvas.height / rect.height;
 
-            // Touch finger offsets have been entirely removed. 
-            // The flashlight center point now anchors perfectly under the touch event position.
             return {
                 x: (clientX - rect.left) * sx,
                 y: (clientY - rect.top) * sy
