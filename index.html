@@ -54,7 +54,7 @@
             display: block; 
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: contain; /* Keeps the room image aspect ratio clean */
         }
 
         .checklist-container {
@@ -159,6 +159,7 @@
             100% { transform: translate(-50%, -130%) scale(1); opacity: 1; top: 30%; }
         }
 
+        /* Adjusts for tight vertical layouts (like standard portrait phones) */
         @media (max-width: 600px) {
             #game-wrapper {
                 grid-template-columns: 65px 1fr 65px;
@@ -206,9 +207,9 @@
                 <img src="radio.png" alt="Radio" class="mini-img">
                 <div class="cross-mark" id="cross-radio">&times;</div>
             </div>
-            <div class="checklist-item" id="item-robot">
-                <img src="robot.png" alt="Robot" class="mini-img">
-                <div class="cross-mark" id="cross-robot">&times;</div>
+            <div class="checklist-item" id="item-stool">
+                <img src="stool.png" alt="Stool" class="mini-img">
+                <div class="cross-mark" id="cross-stool">&times;</div>
             </div>
         </div>
 
@@ -250,6 +251,7 @@
         const scene = new Image(); 
         scene.src = 'toddler room.png'; 
 
+        // Dynamic scale calculation based on screen density
         let dynamicHoleRadius = 85;  
         let isGameOver = false;
         let confettiParticles = [];
@@ -266,7 +268,7 @@
             { id: 'book',       x: 1437, y: 106,  radius: 45, found: false }, 
             { id: 'flower',     x: 280,  y: 283,  radius: 45, found: false }, 
             { id: 'radio',      x: 130,  y: 722,  radius: 50, found: false }, 
-            { id: 'robot',      x: 1084, y: 282,  radius: 45, found: false }  // Swapped stool out for Robot coordinates
+            { id: 'stool',      x: 733,  y: 601,  radius: 45, found: false }  
         ];
 
         function speakExpressively(phrase) {
@@ -297,11 +299,14 @@
             draw(lastX, lastY);
         };
 
+        // Calculates sizes reactively so mobile views don't produce a tiny hole
         function updateResponsiveScale() {
             const rect = canvas.getBoundingClientRect();
+            // Scaling the hole base radius dynamically relative to bounding display box width
             const scaleFactor = canvas.width / rect.width;
             
             if (rect.width < 500) {
+                // On narrow viewports, explicitly widen the internal view radius
                 dynamicHoleRadius = 95 * (scaleFactor * 0.85);
             } else {
                 dynamicHoleRadius = 75 * scaleFactor;
@@ -317,6 +322,7 @@
             let targetClientY = clientY;
 
             if (isTouch) {
+                // Responsive finger offsets based on actual layout scaling
                 const visualOffsetMultiplier = rect.width / 1000; 
                 targetClientX = clientX + (35 * visualOffsetMultiplier); 
                 targetClientY = clientY - (85 / visualOffsetMultiplier); 
@@ -339,7 +345,7 @@
                         target.found = true;
                         document.getElementById(`cross-${target.id}`).style.display = 'flex';
                         document.getElementById(`item-${target.id}`).style.opacity = '0.4';
-                        speakExpressively("Good job!");
+                        speakExpressively("Good!");
                     }
                 }
             });
@@ -357,6 +363,7 @@
             draw(lastX, lastY);
         }
 
+        // Event Handlers
         canvas.addEventListener('click', (e) => {
             checkClickOrTap(e.clientX, e.clientY, false);
         });
@@ -381,7 +388,7 @@
         function winGame() {
             isGameOver = true;
             setTimeout(() => {
-                speakExpressively("You did it!");
+                speakExpressively("Wow! You did it! Outstanding job!");
             }, 500);
             winMessage.classList.add('animate-bounce');
             document.body.style.cursor = 'default';
